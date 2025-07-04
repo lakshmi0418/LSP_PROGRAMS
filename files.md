@@ -116,7 +116,10 @@ if(fp1==NULL)
 char ch;
 while((ch=fgetc(fp))!=EOF)
 {
-        fputc(ch,fp1);/Develop a C program to move a file from one directory to another?
+        fputc(ch,fp1);
+}
+}
+/Develop a C program to move a file from one directory to another?
 #include<stdio.h>
 int main()
 {
