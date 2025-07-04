@@ -521,5 +521,5 @@ write(socket_pair[1],recv,strlen(recv)+1);
                 wait(NULL);
         }
 }
-
+```
 
