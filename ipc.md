@@ -550,5 +550,106 @@ int main()
         shmdt(shared_mem);
         shmctl(shm_id,IPC_RMID,NULL);
 }
+/Write a program that dynamically creates shared memory segments based on user
+//input.
+
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<sys/ipc.h>
+#include<sys/msg.h>
+#include<string.h>
+#include<sys/shm.h>
+//#define size 1024
+
+int main()
+{
+        char * shared_mem;
+        int size;
+        FILE *fp=fopen("shmfile","w");
+        key_t key=ftok("temp2",65);
+        if(key==-1)
+        {
+                perror("key failed");
+                return 1;
+        }
+        printf("enter size\n");
+        scanf("%d",&size);
+        //get the existing shared memory seg
+        int shm_id=shmget(key,size,0666 | IPC_CREAT);
+        if(shm_id==-1)
+        {
+                perror("failed msg id");
+                return 1;
+        }
+        shared_mem=(char *)shmat(shm_id,NULL,0);
+        if(shared_mem==(char*)(-1))
+        {
+                perror("attached");
+                return 1;
+}
+        //read and write to shared memory
+        printf("write a msg to shared memory\n");
+        getchar();
+        fgets(shared_mem,size,stdin);
+printf("%s\n",shared_mem);
+if(shmdt(shared_mem)==-1)
+{
+        perror("detach");
+        return 1;
+}
+printf("detach  sahred mem\n");
+
+
+}
+    //Create a program that monitors and displays the usage statistics of shared memory
+//segments, such as the amount of memory used and the number of attached processes.
+
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<sys/ipc.h>
+#include<sys/msg.h>
+#include<string.h>
+#include<sys/shm.h>
+//#define size 1024
+
+int main()
+{
+        char * shared_mem;
+        int size;
+ struct shmid_ds shminfo;
+        FILE *fp=fopen("shmfile","w");
+        // Generate the same key used to create the shared memory
+        key_t key=ftok("temp2",65);
+        if(key==-1)
+        {
+                perror("key failed");
+                return 1;
+        }
+        // Get shared memory segment ID
+    int shm_id = shmget(key, 0, 0666);
+        if(shm_id==-1)
+        {
+                perror("failed msg id");
+                return 1;
+        }
+// Get statistics using shmctl
+    if (shmctl(shm_id, IPC_STAT, &shminfo) == -1) {
+        perror("shmctl failed");
+        exit(1);
+    }
+ // Display statistics
+    printf("Shared Memory Segment Statistics:\n");
+    printf("----------------------------------\n");
+    printf("Segment Size           : %zu bytes\n", shminfo.shm_segsz);
+    printf("Number of Attachments  : %lu\n", (unsigned long)shminfo.shm_nattch);
+    printf("Last attach time       : %ld\n", shminfo.shm_atime);
+    printf("Last detach time       : %ld\n", shminfo.shm_dtime);
+    printf("Creator PID            : %d\n", shminfo.shm_cpid);
+    printf("Last operator PID      : %d\n", shminfo.shm_lpid);
+    printf("Permissions (octal)    : %o\n", shminfo.shm_perm.mode);
+
+}
 
 ```
