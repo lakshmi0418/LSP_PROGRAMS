@@ -489,5 +489,66 @@ if(shmdt(shared_mem)==-1)
 }
 printf("detach  sahred mem\n");
 }
+//Create a program that forks multiple processes, and each process communicates using
+//shared memory.
+
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<sys/ipc.h>
+#include<sys/msg.h>
+#include<string.h>
+#include<sys/shm.h>
+#include<sys/wait.h>
+#define size 1024
+#define num 3
+int main()
+{
+        char * shared_mem;
+        key_t key=ftok("temp2",65);
+        if(key==-1)
+        {
+                perror("key failed");
+                return 1;
+        }
+        //get the existing shared memory seg
+        int shm_id=shmget(key,size,0666 | IPC_CREAT);
+        if(shm_id==-1)
+        {
+                perror("failed msg id");
+                return 1;
+        }
+        shared_mem=(char *)shmat(shm_id,NULL,0);
+        if(shared_mem==(char*)(-1))
+        {
+                perror("attached");
+                return 1;
+        }
+        for(int i=0;i<num;i++)
+        {
+ if(fork()==0)
+                {
+                        /// Each child writes to its own part of shared memory
+            char message[size];
+            snprintf(message, size, "Message from child %d\n", i + 1);
+            strcpy(shared_mem + (i * size), message);
+
+            // Detach and exit
+            shmdt(shared_mem);
+            exit(0);
+        }
+        }
+                for(int i=0;i<num;i++)
+                {
+                        wait(NULL);
+                }
+                printf("paren reads all msgs\n");
+                for(int i=0;i<num;i++)
+                {
+                        printf("%s",shared_mem+(i*size));
+                }
+        shmdt(shared_mem);
+        shmctl(shm_id,IPC_RMID,NULL);
+}
 
 ```
